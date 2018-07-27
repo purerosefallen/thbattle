@@ -13,6 +13,7 @@ django = "*"
 graphene = "*"
 graphene-django = "*"
 django-annoying = "*"
+pillow = "*"
 
 [dev-packages]
 ipython = "*"

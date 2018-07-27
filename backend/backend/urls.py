@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+admin.site.site_header = '东方符斗祭后台'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
