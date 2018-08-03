@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'friend.apps.FriendConfig',
     'guild.apps.GuildConfig',
     'system.apps.SystemConfig',
+    'graphene_django',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

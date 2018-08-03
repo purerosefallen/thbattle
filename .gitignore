@@ -4,6 +4,7 @@
 *.pyo
 *.swp
 *.un~
+*.sqlite3
 *~
 ?
 !src/resource/c
