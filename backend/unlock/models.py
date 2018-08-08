@@ -17,7 +17,7 @@ class Achievement(models.Model):
         verbose_name_plural = '成就'
 
     id          = models.AutoField(primary_key=True)
-    user        = models.ForeignKey(User, models.CASCADE, verbose_name='玩家')
+    user        = models.ForeignKey(User, models.CASCADE, verbose_name='玩家', related_name='achievements')
     achievement = models.SlugField('成就', max_length=256)
 
     def __str__(self):
@@ -31,7 +31,7 @@ class Unlocked(models.Model):
         verbose_name_plural = '解锁项目'
 
     id   = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, models.CASCADE, verbose_name='玩家')
+    user = models.ForeignKey(User, models.CASCADE, verbose_name='玩家', related_name='unlocks')
     item = models.SlugField('解锁项目', max_length=256)  # character, skin, showgirl
 
     def __str__(self):

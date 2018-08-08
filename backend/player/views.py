@@ -4,11 +4,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # -- stdlib --
 # -- third party --
 from graphene_django.types import DjangoObjectType
+import django.contrib.auth.models as auth_models
+import graphene as gh
 
 # -- own --
 from . import models
-import graphene as gh
-import django.contrib.auth.models as auth_models
 
 
 # -- code --
@@ -33,6 +33,8 @@ class Profile(DjangoObjectType):
 
 
 class Query(object):
-    profile = gh.Field(Profile, id=gh.Int(), name=gh.String())
+    user = gh.Field(User, id=gh.Int(), username=gh.String())
 
-# Create your views here.
+
+class Mutation(object):
+    pass

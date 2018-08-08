@@ -35,7 +35,7 @@ class Block(models.Model):
 
     id      = models.AutoField(primary_key=True)
     user    = models.ForeignKey(User, models.CASCADE, verbose_name='玩家', related_name='+')
-    block   = models.ForeignKey(User, models.CASCADE, verbose_name='拉黑', related_name='+')
+    block   = models.ForeignKey(User, models.CASCADE, verbose_name='拉黑', related_name='blocks')
     created = models.DateTimeField('日期', auto_now_add=True)
 
     def __str__(self):

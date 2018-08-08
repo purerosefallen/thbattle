@@ -2,7 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
-import importlib
+from importlib import import_module as M
 
 # -- third party --
 # -- own --
@@ -11,9 +11,13 @@ import graphene as gh
 
 # -- code --
 QUERIES = [
-    importlib.import_module('badge.views').Query,
-    importlib.import_module('player.views').Query,
-    importlib.import_module('system.views').Query,
+    M('badge.views').Query,
+    M('player.views').Query,
+    M('friend.views').Query,
+    M('guild.views').Query,
+    M('item.views').Query,
+    M('unlock.views').Query,
+    M('system.views').Query,
 ]
 
 
@@ -22,7 +26,13 @@ class Query(*QUERIES, gh.ObjectType):
 
 
 MUTATIONS = [
-    importlib.import_module('system.views').Mutation,
+    M('badge.views').Mutation,
+    M('player.views').Mutation,
+    M('friend.views').Mutation,
+    M('guild.views').Mutation,
+    M('item.views').Mutation,
+    M('unlock.views').Mutation,
+    M('system.views').Mutation,
 ]
 
 

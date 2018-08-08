@@ -13,13 +13,12 @@ import graphene as gh
 # -- code --
 class Badge(DjangoObjectType):
     class Meta:
-        model = models.Badge
-
-
-class BadgeType(DjangoObjectType):
-    class Meta:
         model = models.BadgeType
 
 
 class Query(object):
     badges = gh.List(Badge)
+
+
+class Mutation(object):
+    pass
