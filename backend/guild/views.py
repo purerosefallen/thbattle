@@ -21,11 +21,6 @@ class GuildMember(DjangoObjectType):
         model = models.GuildMember
 
 
-class GuildBadge(DjangoObjectType):
-    class Meta:
-        model = models.GuildBadge
-
-
 class Query(object):
     guild = gh.Field(Guild, id=gh.Int(), name=gh.String())
 

@@ -18,9 +18,7 @@ class Item(models.Model):
 
     id     = models.AutoField(primary_key=True)
     owner  = models.ForeignKey(User, models.CASCADE, verbose_name='所有者', related_name='items')
-    type   = models.SlugField('类型', max_length=20)
-    arg    = models.IntegerField('参数', default=0)
-    status = models.SlugField('类型', max_length=20)  # backpack, exchange, used
+    type   = models.SlugField('类型', max_length=20)  # some-item:arg
 
     def __str__(self):
         return f'[{self.id}] {self.type}:{self.arg}'
@@ -51,7 +49,7 @@ class Exchange(models.Model):
 
     id     = models.AutoField(primary_key=True)
     seller = models.ForeignKey(User, models.CASCADE, verbose_name='卖家', related_name='exchanges')
-    item   = models.ForeignKey(Item, models.CASCADE, verbose_name='道具', related_name='exchanges')
+    type   = models.SlugField('类型', max_length=20)  # some-item:arg
     price  = models.PositiveIntegerField('价格')
 
     def __str__(self):

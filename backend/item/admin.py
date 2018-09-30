@@ -12,8 +12,8 @@ from . import models
 # -- code --
 @admin.register(models.Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'owner', 'type', 'arg', 'status')
-    list_filter = ('type', 'status')
+    list_display = ('id', 'owner', 'type')
+    list_filter = ('type',)
     search_fields = ('owner__username',)
     ordering = ('owner',)
 
@@ -28,7 +28,7 @@ class ItemActivityAdmin(admin.ModelAdmin):
 
 @admin.register(models.Exchange)
 class ExchangeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'seller', 'item', 'price')
+    list_display = ('id', 'seller', 'type', 'price')
     list_filter = ()
-    search_fields = ('seller__username', 'item__type')
+    search_fields = ('seller__username', 'type')
     ordering = ('seller',)

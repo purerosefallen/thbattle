@@ -15,6 +15,16 @@ from . import models
 class User(DjangoObjectType):
     class Meta:
         model = auth_models.User
+        exclude_fields = [
+            'password',
+            'last_login',
+            'is_superuser',
+            'first_name',
+            'last_name',
+            'email',
+            'is_staff',
+            'date_joined',
+        ]
 
 
 class Group(DjangoObjectType):
@@ -30,6 +40,9 @@ class Permission(DjangoObjectType):
 class Profile(DjangoObjectType):
     class Meta:
         model = models.Profile
+        exclude_fields = [
+            'phone',
+        ]
 
 
 class Query(object):

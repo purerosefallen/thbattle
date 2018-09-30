@@ -1,0 +1,43 @@
+mutation {
+    // user
+    login(id, username, phone, password!) {
+        token!
+    }
+    register(username!, phone!, smscode!) {
+        id!
+    }
+    resetPassword(phone!, smscode!, password!) {}
+    requestSmsCode(phone, token!, captcha) {}
+    updateProfile(...) {
+        ...profile
+    }
+
+    // badge
+
+    // friend
+    makeFriend
+    removeFriend
+
+    // guild
+    startGuild
+    transferGuild
+    joinGuild
+    approveGuild
+    kickGuildMember
+    quitGuild
+    updateGuild
+
+    // item
+    addItem
+    removeItem
+    buyItem
+    sellItem
+    cancelSellItem
+
+    // system
+    nextGameId
+
+    // unlock
+    addUnlock
+    addAchievement
+}

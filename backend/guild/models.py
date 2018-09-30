@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from django.db import models
 
 # -- own --
-from badge.models import BadgeType
 
 
 # -- code --
@@ -23,7 +22,7 @@ class Guild(models.Model):
     leader  = models.ForeignKey(User, models.CASCADE, verbose_name='领袖', related_name='leading_guilds')
     slogan  = models.CharField('口号', max_length=200)
     totem   = models.ImageField('图腾', blank=True)
-    created = models.DateTimeField('创建日期', auto_now_add=True)
+    founded = models.DateTimeField('创建日期', auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -37,7 +36,7 @@ class GuildMember(models.Model):
 
     id     = models.AutoField(primary_key=True)
     guild  = models.ForeignKey(Guild, models.CASCADE, verbose_name='势力', related_name='members')
-    member = models.ForeignKey(User, models.CASCADE, verbose_name='成员', related_name='+')
+    user   = models.ForeignKey(User, models.CASCADE, verbose_name='成员', related_name='+')
     joined = models.DateTimeField('加入日期', auto_now_add=True)
 
     def __str__(self):

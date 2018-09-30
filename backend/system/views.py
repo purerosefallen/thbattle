@@ -21,6 +21,11 @@ class News(DjangoObjectType):
         model = models.News
 
 
+class Setting(DjangoObjectType):
+    class Meta:
+        model = models.Setting
+
+
 # ------------------------
 class NextGameId(gh.Mutation):
     class Arguments:

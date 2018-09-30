@@ -15,7 +15,7 @@ from . import models
 
 @admin.register(models.Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone', 'verified', 'title', 'ppoint', 'jiecao', 'games', 'drops')
+    list_display = ('user', 'phone', 'title', 'ppoint', 'jiecao', 'games', 'drops')
     list_filter = ()
     search_fields = ('user__username', 'phone', 'user__email')
     ordering = ('user',)

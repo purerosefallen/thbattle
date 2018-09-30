@@ -12,7 +12,7 @@ from . import models
 # -- code --
 @admin.register(models.Guild)
 class GuildAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'founder', 'leader', 'slogan', 'totem', 'created')
+    list_display = ('id', 'name', 'founder', 'leader', 'slogan', 'totem', 'founded')
     list_filter = ()
     search_fields = ('name', 'founder__username', 'leader__username')
     ordering = ('id',)
@@ -20,15 +20,7 @@ class GuildAdmin(admin.ModelAdmin):
 
 @admin.register(models.GuildMember)
 class GuildMemberAdmin(admin.ModelAdmin):
-    list_display = ('id', 'guild', 'member', 'joined')
+    list_display = ('id', 'guild', 'user', 'joined')
     list_filter = ()
-    search_fields = ('guild__name', 'member__username')
-    ordering = ('id',)
-
-
-@admin.register(models.GuildBadge)
-class GuildBadgeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'guild', 'type', 'created')
-    list_filter = ()
-    search_fields = ('guild__name', 'type__title')
+    search_fields = ('guild__name', 'user__username')
     ordering = ('id',)
