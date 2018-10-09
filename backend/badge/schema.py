@@ -16,6 +16,16 @@ class Badge(DjangoObjectType):
         model = models.BadgeType
 
 
+class PlayerBadge(DjangoObjectType):
+    class Meta:
+        model = models.PlayerBadge
+
+
+class GuildBadge(DjangoObjectType):
+    class Meta:
+        model = models.GuildBadge
+
+
 class Query(object):
     badges = gh.List(Badge)
 

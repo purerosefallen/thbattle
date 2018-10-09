@@ -19,6 +19,7 @@ class Achievement(models.Model):
     id          = models.AutoField(primary_key=True)
     user        = models.ForeignKey(User, models.CASCADE, verbose_name='玩家', related_name='achievements')
     achievement = models.SlugField('成就', max_length=256)
+    achievedAt  = models.DateTimeField('日期', auto_now_add=True)
 
     def __str__(self):
         return f'{self.user.username} - {self.achievement}'
@@ -30,9 +31,10 @@ class Unlocked(models.Model):
         verbose_name        = '解锁项目'
         verbose_name_plural = '解锁项目'
 
-    id   = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, models.CASCADE, verbose_name='玩家', related_name='unlocks')
-    item = models.SlugField('解锁项目', max_length=256)  # character, skin, showgirl
+    id         = models.AutoField(primary_key=True)
+    user       = models.ForeignKey(User, models.CASCADE, verbose_name='玩家', related_name='unlocks')
+    item       = models.SlugField('解锁项目', max_length=256)  # character, skin, showgirl
+    unlockedAt = models.DateTimeField('日期', auto_now_add=True)
 
     def __str__(self):
         return f'{self.user.username} - {self.item}'

@@ -11,13 +11,13 @@ import graphene as gh
 
 # -- code --
 QUERIES = [
-    M('badge.views').Query,
-    M('player.views').Query,
-    M('friend.views').Query,
-    M('guild.views').Query,
-    M('item.views').Query,
-    M('unlock.views').Query,
-    M('system.views').Query,
+    M('badge.schema').Query,
+    M('player.schema').Query,
+    M('friend.schema').Query,
+    M('guild.schema').Query,
+    M('item.schema').Query,
+    M('unlock.schema').Query,
+    M('system.schema').Query,
 ]
 
 
@@ -26,13 +26,13 @@ class Query(*QUERIES, gh.ObjectType):
 
 
 MUTATIONS = [
-    M('badge.views').Mutation,
-    M('player.views').Mutation,
-    M('friend.views').Mutation,
-    M('guild.views').Mutation,
-    M('item.views').Mutation,
-    M('unlock.views').Mutation,
-    M('system.views').Mutation,
+    M('badge.schema').Mutation,
+    M('player.schema').Mutation,
+    M('friend.schema').Mutation,
+    M('guild.schema').Mutation,
+    M('item.schema').Mutation,
+    M('unlock.schema').Mutation,
+    M('system.schema').Mutation,
 ]
 
 

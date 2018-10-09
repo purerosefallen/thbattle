@@ -20,7 +20,7 @@ class BadgeTypeAdmin(admin.ModelAdmin):
 
 @admin.register(models.PlayerBadge)
 class PlayerBadgeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'owner', 'type', 'created')
+    list_display = ('id', 'owner', 'type', 'acquiredAt')
     list_filter = ('type',)
     search_fields = ('owner__username', 'type__title', 'type__description')
     ordering = ('id',)
@@ -28,7 +28,7 @@ class PlayerBadgeAdmin(admin.ModelAdmin):
 
 @admin.register(models.GuildBadge)
 class GuildBadgeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'guild', 'type', 'created')
+    list_display = ('id', 'guild', 'type', 'acquiredAt')
     list_filter = ()
     search_fields = ('guild__name', 'type__title')
     ordering = ('id',)
