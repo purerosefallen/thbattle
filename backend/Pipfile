@@ -11,9 +11,9 @@ meinheld = "*"
 gunicorn = "*"
 django = "*"
 graphene = "*"
-graphene-django = "*"
 django-annoying = "*"
 pillow = "*"
+graphene-django = "*"
 
 [dev-packages]
 ipython = "*"
