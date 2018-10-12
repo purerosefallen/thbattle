@@ -14,16 +14,16 @@ from . import models
 class ItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'owner', 'type')
     list_filter = ('type',)
-    search_fields = ('owner__username',)
+    search_fields = ('player__name',)
     ordering = ('owner',)
 
 
 @admin.register(models.ItemActivity)
 class ItemActivityAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'action', 'item', 'extra', 'created')
+    list_display = ('id', 'player', 'action', 'item', 'extra', 'created')
     list_filter = ('action',)
-    search_fields = ('user__username', 'item__type')
-    ordering = ('user',)
+    search_fields = ('player__name', 'item__type')
+    ordering = ('player',)
 
 
 @admin.register(models.Exchange)

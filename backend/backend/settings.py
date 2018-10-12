@@ -25,7 +25,8 @@ SECRET_KEY = 'ew&(_dc#t346(!qzan_paw2^5f3r)3g80)1l+s_e%7&!a7nr$-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+]
 
 
 # Application definition
@@ -126,3 +127,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+AUTH_USER_MODEL = 'player.User'

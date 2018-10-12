@@ -14,16 +14,9 @@ from . import models
 # -- code --
 class User(DjangoObjectType):
     class Meta:
-        model = auth_models.User
+        model = models.User
         exclude_fields = [
             'password',
-            'last_login',
-            'is_superuser',
-            'first_name',
-            'last_name',
-            'email',
-            'is_staff',
-            'date_joined',
         ]
 
 
@@ -37,17 +30,61 @@ class Permission(DjangoObjectType):
         model = auth_models.Permission
 
 
-class Profile(DjangoObjectType):
+class Player(DjangoObjectType):
     class Meta:
-        model = models.Profile
+        model = models.Player
         exclude_fields = [
             'phone',
         ]
 
 
+class Credit(DjangoObjectType):
+    class Meta:
+        model = models.Credit
+
+
 class Query(object):
     user = gh.Field(User, id=gh.Int(), username=gh.String())
 
+    @staticmethod
+    def resolve_user(root, info, id=None, username=None):
+        if id is not None:
+            return models.User.objects.get(id=id)
+        elif username is not None:
+            return models.User.objects.get(username=username)
+
+        return None
+
+
+class Register(gh.Mutation):
+    class Arguments:
+        username = gh.String(required=True)
+        phone    = gh.String(required=True)
+        smscode  = gh.Int(required=True)
+
+    token = gh.String(required=True)
+
+    @staticmethod
+    def mutate(root, info, username, phone, smscode):
+        return Register(token=f'{username}-{phone}-{smscode}')
+
+
+class RequestSMSCode(gh.Mutation):
+    class Arguments:
+        phone = gh.Int(required=True)
+
+    @staticmethod
+    def mutate(root, info, username, phone, smscode):
+        return Register(token=f'{username}-{phone}-{smscode}')
+
+
+class UserOps(gh.ObjectType):
+    register = Register.Field()
+
 
 class Mutation(object):
-    pass
+    user = gh.Field(UserOps)
+
+    @staticmethod
+    def resolve_user(root, info):
+        return UserOps()

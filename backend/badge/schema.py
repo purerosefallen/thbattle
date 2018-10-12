@@ -7,27 +7,16 @@ from graphene_django.types import DjangoObjectType
 
 # -- own --
 from . import models
-import graphene as gh
 
 
 # -- code --
 class Badge(DjangoObjectType):
     class Meta:
-        model = models.BadgeType
-
-
-class PlayerBadge(DjangoObjectType):
-    class Meta:
-        model = models.PlayerBadge
-
-
-class GuildBadge(DjangoObjectType):
-    class Meta:
-        model = models.GuildBadge
+        model = models.Badge
 
 
 class Query(object):
-    badges = gh.List(Badge)
+    pass
 
 
 class Mutation(object):

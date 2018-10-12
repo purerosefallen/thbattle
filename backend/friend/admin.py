@@ -12,15 +12,15 @@ from . import models
 # -- code --
 @admin.register(models.Friend)
 class FriendAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'friend', 'created')
+    list_display = ('id', 'player', 'friend', 'created')
     list_filter = ()
-    search_fields = ('user__username',)
+    search_fields = ('player__name',)
     ordering = ('id',)
 
 
 @admin.register(models.Block)
 class BlockAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'block', 'created')
+    list_display = ('id', 'player', 'block', 'created')
     list_filter = ()
-    search_fields = ('user__username',)
+    search_fields = ('player__name',)
     ordering = ('id',)

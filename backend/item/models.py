@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # -- stdlib --
 # -- third party --
 from django.db import models
-from django.contrib.auth.models import User
+from player.models import Player
 
 # -- own --
 
@@ -17,7 +17,7 @@ class Item(models.Model):
         verbose_name_plural = '道具'
 
     id     = models.AutoField(primary_key=True)
-    owner  = models.ForeignKey(User, models.CASCADE, verbose_name='所有者', related_name='items')
+    owner  = models.ForeignKey(Player, models.CASCADE, verbose_name='所有者', related_name='items')
     type   = models.SlugField('类型', max_length=20)  # some-item:arg
 
     def __str__(self):
@@ -31,7 +31,7 @@ class ItemActivity(models.Model):
         verbose_name_plural = '道具动作历史'
 
     id      = models.AutoField(primary_key=True)
-    user    = models.ForeignKey(User, models.CASCADE, verbose_name='相关用户', related_name='+')
+    player  = models.ForeignKey(Player, models.CASCADE, verbose_name='相关用户', related_name='+')
     action  = models.SlugField('动作', max_length=20)
     item    = models.ForeignKey(Item, models.CASCADE, verbose_name='道具', related_name='activities')
     extra   = models.CharField('额外数据', max_length=256)
@@ -48,7 +48,7 @@ class Exchange(models.Model):
         verbose_name_plural = '交易中的道具'
 
     id     = models.AutoField(primary_key=True)
-    seller = models.ForeignKey(User, models.CASCADE, verbose_name='卖家', related_name='exchanges')
+    seller = models.ForeignKey(Player, models.CASCADE, verbose_name='卖家', related_name='exchanges')
     type   = models.SlugField('类型', max_length=20)  # some-item:arg
     price  = models.PositiveIntegerField('价格')
 

@@ -12,15 +12,15 @@ from . import models
 # -- code --
 @admin.register(models.Unlocked)
 class UnlockedAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'item')
+    list_display = ('id', 'player', 'item')
     list_filter = ()
-    search_fields = ('user__username', 'item')
-    ordering = ('user',)
+    search_fields = ('player__name', 'item')
+    ordering = ('player',)
 
 
 @admin.register(models.Achievement)
 class AchievementAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'achievement')
+    list_display = ('id', 'player', 'achievement')
     list_filter = ()
-    search_fields = ('user__username', 'achievement')
-    ordering = ('user',)
+    search_fields = ('player__name', 'achievement')
+    ordering = ('player',)
