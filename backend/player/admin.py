@@ -37,6 +37,7 @@ class PlayerAdmin(admin.ModelAdmin):
     list_display = ('user', 'guild')
     list_filter = ()
     search_fields = ('user__username', 'guild__name')
+    filter_horizontal = ('badges',)
     ordering = ('user',)
 
 

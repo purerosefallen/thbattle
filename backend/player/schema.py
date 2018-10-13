@@ -37,6 +37,12 @@ class Player(DjangoObjectType):
             'phone',
         ]
 
+    friend_requests = gh.List(
+        gh.NonNull('player.schema.Player'),
+        required=True,
+        description="未处理的好友请求",
+    )
+
 
 class Credit(DjangoObjectType):
     class Meta:
@@ -44,6 +50,7 @@ class Credit(DjangoObjectType):
 
 
 class Query(object):
+    '''
     user = gh.Field(User, id=gh.Int(), username=gh.String())
 
     @staticmethod
@@ -54,6 +61,7 @@ class Query(object):
             return models.User.objects.get(username=username)
 
         return None
+    '''
 
 
 class Register(gh.Mutation):
@@ -62,29 +70,49 @@ class Register(gh.Mutation):
         phone    = gh.String(required=True)
         smscode  = gh.Int(required=True)
 
-    token = gh.String(required=True)
+    token = gh.String(required=True, description="登录令牌")
+    player = gh.Field(Player, required=True, description="玩家")
 
     @staticmethod
     def mutate(root, info, username, phone, smscode):
         return Register(token=f'{username}-{phone}-{smscode}')
 
 
-class RequestSMSCode(gh.Mutation):
+class Login(gh.Mutation):
     class Arguments:
-        phone = gh.Int(required=True)
+        id       = gh.ID(description="用户ID")
+        forum_id = gh.ID(description="论坛用户ID")
+        phone    = gh.String(description="手机")
+        name     = gh.String(description="昵称")
+        password = gh.String(required=True, description="密码")
+
+    token = gh.String(required=True, description="登录令牌")
 
     @staticmethod
-    def mutate(root, info, username, phone, smscode):
-        return Register(token=f'{username}-{phone}-{smscode}')
+    def mutate(root, info):
+        pass
 
 
-class UserOps(gh.ObjectType):
-    register = Register.Field()
+class PlayerOps(gh.ObjectType):
+    login    = Login.Field(description="登录")
+    register = Register.Field(description="注册")
+    update = gh.Field(
+        Player,
+        bio=gh.String(description="签名"),
+        required=True,
+        description="更新资料",
+    )
+    bind_forum = gh.Field(
+        Player,
+        forum_id=gh.ID(required=True, description="论坛UID"),
+        forum_password=gh.String(required=True, description="论坛密码"),
+        description="绑定论坛帐号",
+    )
 
 
 class Mutation(object):
-    user = gh.Field(UserOps)
+    player = gh.Field(PlayerOps, description="用户/玩家")
 
     @staticmethod
     def resolve_user(root, info):
-        return UserOps()
+        return PlayerOps()

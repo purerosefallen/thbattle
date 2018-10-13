@@ -30,12 +30,12 @@ class ItemActivity(models.Model):
         verbose_name        = '道具动作历史'
         verbose_name_plural = '道具动作历史'
 
-    id      = models.AutoField(primary_key=True)
-    player  = models.ForeignKey(Player, models.CASCADE, verbose_name='相关用户', related_name='+')
-    action  = models.SlugField('动作', max_length=20)
-    item    = models.ForeignKey(Item, models.CASCADE, verbose_name='道具', related_name='activities')
-    extra   = models.CharField('额外数据', max_length=256)
-    created = models.DateTimeField('日期', auto_now_add=True)
+    id         = models.AutoField(primary_key=True)
+    player     = models.ForeignKey(Player, models.CASCADE, verbose_name='相关用户', related_name='+')
+    action     = models.SlugField('动作', max_length=20)
+    item       = models.ForeignKey(Item, models.CASCADE, verbose_name='道具', related_name='activities')
+    extra      = models.CharField('额外数据', max_length=256)
+    created_at = models.DateTimeField('日期', auto_now_add=True)
 
     def __str__(self):
         return self.id

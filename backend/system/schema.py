@@ -44,3 +44,8 @@ class Query(object):
 
 class Mutation(object):
     next_game_id = NextGameId.Field()
+
+    smscode = gh.Boolean(
+        phone=gh.String(required=True, description="手机号"),
+        description="请求验证码",
+    )

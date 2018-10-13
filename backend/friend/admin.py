@@ -12,7 +12,7 @@ from . import models
 # -- code --
 @admin.register(models.Friend)
 class FriendAdmin(admin.ModelAdmin):
-    list_display = ('id', 'player', 'friend', 'created')
+    list_display = ('id', 'player', 'friend', 'followed_at')
     list_filter = ()
     search_fields = ('player__name',)
     ordering = ('id',)
@@ -20,7 +20,7 @@ class FriendAdmin(admin.ModelAdmin):
 
 @admin.register(models.Block)
 class BlockAdmin(admin.ModelAdmin):
-    list_display = ('id', 'player', 'block', 'created')
+    list_display = ('id', 'player', 'block', 'blocked_at')
     list_filter = ()
     search_fields = ('player__name',)
     ordering = ('id',)

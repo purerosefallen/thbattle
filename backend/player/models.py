@@ -77,8 +77,8 @@ class Player(models.Model):
     name     = models.CharField('昵称', unique=True, max_length=150)
     forum_id = models.IntegerField('论坛ID', blank=True, null=True, unique=True)
     bio      = models.CharField('签名', blank=True, max_length=150)
-    guild    = models.ForeignKey('guild.Guild', models.SET_NULL, blank=True, null=True)
-    badges   = models.ManyToManyField('badge.Badge', related_name='players')
+    guild    = models.ForeignKey('guild.Guild', models.SET_NULL, related_name='members', verbose_name='势力', blank=True, null=True)
+    badges   = models.ManyToManyField('badge.Badge', related_name='players', verbose_name='勋章')
 
     def __str__(self):
         return self.user.username
