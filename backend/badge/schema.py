@@ -13,11 +13,3 @@ from . import models
 class Badge(DjangoObjectType):
     class Meta:
         model = models.Badge
-
-
-class Query(object):
-    pass
-
-
-class Mutation(object):
-    pass

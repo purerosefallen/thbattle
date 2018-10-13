@@ -54,19 +54,40 @@ class Credit(DjangoObjectType):
         model = models.Credit
 
 
-class Query(object):
-    '''
-    user = gh.Field(User, id=gh.Int(), username=gh.String())
+class PlayerQuery(gh.ObjectType):
+    user = gh.Field(
+        User,
+        id=gh.Int(description="用户ID"),
+        phone=gh.String(description="手机号"),
+        description="获取用户",
+    )
 
     @staticmethod
-    def resolve_user(root, info, id=None, username=None):
+    def resolve_user(root, info, id=None, phone=None):
+        # FIXME: authorization
+
         if id is not None:
             return models.User.objects.get(id=id)
-        elif username is not None:
-            return models.User.objects.get(username=username)
+        elif phone is not None:
+            return models.User.objects.get(phone=phone)
 
         return None
-    '''
+
+    player = gh.Field(
+        Player,
+        id=gh.Int(description="玩家ID"),
+        name=gh.String(description="玩家昵称"),
+        description="获取玩家",
+    )
+
+    @staticmethod
+    def resolve_player(root, info, id=None, name=None):
+        if id is not None:
+            return models.Player.objects.get(id=id)
+        elif name is not None:
+            return models.Player.objects.get(name=name)
+
+        return None
 
 
 class Register(gh.Mutation):
@@ -113,23 +134,23 @@ class PlayerOps(gh.ObjectType):
         forum_password=gh.String(required=True, description="论坛密码"),
         description="绑定论坛帐号",
     )
-
-
-class FriendOps(gh.ObjectType):
-    request = gh.Boolean(id=gh.ID(required=True), description="发起好友请求")
-    remove  = gh.Boolean(id=gh.ID(required=True), description="移除好友/拒绝好友请求")
-    block   = gh.Boolean(id=gh.ID(required=True), description="拉黑")
-    unblock = gh.Boolean(id=gh.ID(required=True), description="解除拉黑")
-
-
-class Mutation(object):
-    player = gh.Field(PlayerOps, description="用户/玩家")
-    friend = gh.Field(FriendOps, description="好友相关操作")
-
-    @staticmethod
-    def resolve_user(root, info):
-        return PlayerOps()
-
-    @staticmethod
-    def resolve_friend(root, info):
-        return FriendOps()
+    friend = gh.Boolean(
+        id=gh.ID(required=True, description="目标玩家ID"),
+        required=True,
+        description="发起好友请求",
+    )
+    unfriend = gh.Boolean(
+        id=gh.ID(required=True, description="目标玩家ID"),
+        required=True,
+        description="移除好友/拒绝好友请求",
+    )
+    block = gh.Boolean(
+        id=gh.ID(required=True, description="目标玩家ID"),
+        required=True,
+        description="拉黑",
+    )
+    unblock = gh.Boolean(
+        id=gh.ID(required=True, description="目标玩家ID"),
+        required=True,
+        description="解除拉黑",
+    )

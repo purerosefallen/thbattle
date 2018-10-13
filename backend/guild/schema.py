@@ -21,14 +21,6 @@ class GuildQuery(gh.ObjectType):
     guilds = gh.Field(Guild, keyword=gh.String(required=True))
 
 
-class Query(object):
-    guild = gh.Field(GuildQuery, description="势力相关查询")
-
-    @staticmethod
-    def resolve_guild(root, info):
-        return GuildQuery()
-
-
 class GuildOps(gh.ObjectType):
     create = gh.Field(
         Guild,
@@ -76,11 +68,3 @@ class GuildOps(gh.ObjectType):
         required=True,
         description="更新势力信息",
     )
-
-
-class Mutation(object):
-    guild = gh.Field(GuildOps, description="势力相关操作")
-
-    @staticmethod
-    def resolve_guild(root, info):
-        return GuildOps()

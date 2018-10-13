@@ -34,14 +34,6 @@ class ExchangeQuery(gh.ObjectType):
     )
 
 
-class Query(object):
-    exchange = gh.Field(ExchangeQuery, description="交易所")
-
-    @staticmethod
-    def resolve_exchange(root, info):
-        return ExchangeQuery()
-
-
 class ExchangeOps(gh.ObjectType):
     buy    = gh.Field(Item, exchangeItemId=gh.ID(required=True, description="交易条目ID"), description="购买")
     sell   = gh.Field(ExchangeItem, itemId=gh.ID(required=True, description="物品ID"), description="出售")
@@ -61,16 +53,3 @@ class ItemOps(gh.ObjectType):
         reason=gh.String(required=True, description="原因"),
         description="移除物品",
     )
-
-
-class Mutation(object):
-    item = gh.Field(ItemOps, description="物品")
-    exchange = gh.Field(ExchangeOps, description="交易所")
-
-    @staticmethod
-    def resolve_item(root, info):
-        return ItemOps()
-
-    @staticmethod
-    def resolve_exchange(root, info):
-        return ExchangeOps()

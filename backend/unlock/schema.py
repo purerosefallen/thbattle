@@ -21,10 +21,6 @@ class Unlocked(DjangoObjectType):
         model = models.Unlocked
 
 
-class Query(object):
-    pass
-
-
 class UnlockOps(gh.ObjectType):
     add_unlock = gh.Boolean(
         id=gh.ID(required=True, description="用户ID"),
@@ -39,11 +35,3 @@ class UnlockOps(gh.ObjectType):
         required=True,
         description="增加成就",
     )
-
-
-class Mutation(object):
-    unlock = gh.Field(UnlockOps, description="解锁/成就")
-
-    @staticmethod
-    def resolve_unlock(root, info):
-        return UnlockOps()

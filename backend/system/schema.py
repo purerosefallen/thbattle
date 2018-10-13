@@ -27,25 +27,15 @@ class Setting(DjangoObjectType):
 
 
 # ------------------------
-class NextGameId(gh.Mutation):
-    class Arguments:
-        pass
-
-    id = gh.Int()
-
-    def mutate(self, info):
-        pass
-
-
-class Query(object):
+class SystemQuery(gh.ObjectType):
     version = gh.Field(Version, id=gh.String())
+    setting = gh.String(key=gh.String(required=True, description="设置 Key"), description="获取全局设置")
     news = gh.Field(News)
+    game_id = gh.Int(required=True, description="分配游戏ID")
 
 
-class Mutation(object):
-    next_game_id = NextGameId.Field()
-
-    smscode = gh.Boolean(
+class SystemOps(gh.ObjectType):
+    sms_code = gh.Boolean(
         phone=gh.String(required=True, description="手机号"),
         description="请求验证码",
     )

@@ -61,10 +61,10 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
 
     objects = UserManager()
 
-    phone = models.CharField('手机号', unique=True, max_length=15, validators=[is_phone_number])
+    phone = models.CharField('手机号', unique=True, max_length=15, validators=[is_phone_number], help_text='手机号')
     is_staff = models.BooleanField('职员状态', default=False, help_text='是否可以登录后台')
     is_active = models.BooleanField('启用帐号', default=True, help_text='指明用户是否被认为活跃的。以反选代替删除帐号。')
-    date_joined = models.DateTimeField('加入日期', default=timezone.now)
+    date_joined = models.DateTimeField('加入日期', default=timezone.now, help_text='加入日期')
 
 
 class Player(models.Model):
@@ -73,14 +73,19 @@ class Player(models.Model):
         verbose_name        = '玩家'
         verbose_name_plural = '玩家'
 
-    user     = AutoOneToOneField(User, models.CASCADE, verbose_name='用户')
-    name     = models.CharField('昵称', unique=True, max_length=150)
-    forum_id = models.IntegerField('论坛ID', blank=True, null=True, unique=True)
-    bio      = models.CharField('签名', blank=True, max_length=150)
-    guild    = models.ForeignKey('guild.Guild', models.SET_NULL, related_name='members', verbose_name='势力', blank=True, null=True)
-    badges   = models.ManyToManyField('badge.Badge', related_name='players', verbose_name='勋章')
-    friends  = models.ManyToManyField('player.Player', related_name='+', verbose_name='好友')
-    blocks   = models.ManyToManyField('player.Player', related_name='+', verbose_name='黑名单')
+    user     = AutoOneToOneField(User, models.CASCADE, verbose_name='用户', help_text='关联用户')
+    name     = models.CharField('昵称', unique=True, max_length=150, help_text='昵称')
+    forum_id = models.IntegerField('论坛ID', blank=True, null=True, unique=True, help_text='论坛ID')
+    bio      = models.CharField('签名', blank=True, max_length=150, help_text='签名')
+    guild    = models.ForeignKey(
+        'guild.Guild', models.SET_NULL,
+        related_name='members', verbose_name='势力',
+        blank=True, null=True,
+        help_text='势力',
+    )
+    badges   = models.ManyToManyField('badge.Badge', related_name='players', verbose_name='勋章', help_text='勋章')
+    friends  = models.ManyToManyField('player.Player', related_name='+', verbose_name='好友', help_text='好友')
+    blocks   = models.ManyToManyField('player.Player', related_name='+', verbose_name='黑名单', help_text='黑名单')
 
     def __str__(self):
         return self.name
@@ -92,11 +97,11 @@ class Credit(models.Model):
         verbose_name        = '积分'
         verbose_name_plural = '积分'
 
-    player = AutoOneToOneField(Player, models.CASCADE, verbose_name='玩家')
-    ppoint = models.IntegerField('P点')
-    jiecao = models.IntegerField('节操')
-    games  = models.IntegerField('游戏数')
-    drops  = models.IntegerField('逃跑数')
+    player = AutoOneToOneField(Player, models.CASCADE, verbose_name='玩家', help_text='玩家')
+    ppoint = models.IntegerField('P点', help_text='P点')
+    jiecao = models.IntegerField('节操', help_text='节操')
+    games  = models.IntegerField('游戏数', help_text='游戏数')
+    drops  = models.IntegerField('逃跑数', help_text='逃跑数')
 
     def __str__(self):
         return self.player.name
