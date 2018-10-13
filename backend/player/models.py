@@ -79,9 +79,11 @@ class Player(models.Model):
     bio      = models.CharField('签名', blank=True, max_length=150)
     guild    = models.ForeignKey('guild.Guild', models.SET_NULL, related_name='members', verbose_name='势力', blank=True, null=True)
     badges   = models.ManyToManyField('badge.Badge', related_name='players', verbose_name='勋章')
+    friends  = models.ManyToManyField('player.Player', related_name='+', verbose_name='好友')
+    blocks   = models.ManyToManyField('player.Player', related_name='+', verbose_name='黑名单')
 
     def __str__(self):
-        return self.user.username
+        return self.name
 
 
 class Credit(models.Model):
@@ -97,4 +99,4 @@ class Credit(models.Model):
     drops  = models.IntegerField('逃跑数')
 
     def __str__(self):
-        return self.player.user.username
+        return self.player.name

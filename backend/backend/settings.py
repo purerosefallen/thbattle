@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'badge.apps.BadgeConfig',
     'unlock.apps.UnlockConfig',
     'item.apps.ItemConfig',
-    'friend.apps.FriendConfig',
     'guild.apps.GuildConfig',
     'system.apps.SystemConfig',
     'graphene_django',

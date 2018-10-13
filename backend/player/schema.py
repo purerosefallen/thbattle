@@ -43,6 +43,11 @@ class Player(DjangoObjectType):
         description="未处理的好友请求",
     )
 
+    @staticmethod
+    def resolve_friends(root, info):
+        '要特殊处理'
+        pass
+
 
 class Credit(DjangoObjectType):
     class Meta:
@@ -110,9 +115,21 @@ class PlayerOps(gh.ObjectType):
     )
 
 
+class FriendOps(gh.ObjectType):
+    request = gh.Boolean(id=gh.ID(required=True), description="发起好友请求")
+    remove  = gh.Boolean(id=gh.ID(required=True), description="移除好友/拒绝好友请求")
+    block   = gh.Boolean(id=gh.ID(required=True), description="拉黑")
+    unblock = gh.Boolean(id=gh.ID(required=True), description="解除拉黑")
+
+
 class Mutation(object):
     player = gh.Field(PlayerOps, description="用户/玩家")
+    friend = gh.Field(FriendOps, description="好友相关操作")
 
     @staticmethod
     def resolve_user(root, info):
         return PlayerOps()
+
+    @staticmethod
+    def resolve_friend(root, info):
+        return FriendOps()

@@ -13,7 +13,6 @@ import graphene as gh
 QUERIES = [
     M('badge.schema').Query,
     M('player.schema').Query,
-    M('friend.schema').Query,
     M('guild.schema').Query,
     M('item.schema').Query,
     M('unlock.schema').Query,
@@ -28,7 +27,6 @@ class Query(*QUERIES, gh.ObjectType):
 MUTATIONS = [
     M('badge.schema').Mutation,
     M('player.schema').Mutation,
-    M('friend.schema').Mutation,
     M('guild.schema').Mutation,
     M('item.schema').Mutation,
     M('unlock.schema').Mutation,
