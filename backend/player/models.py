@@ -77,15 +77,31 @@ class Player(models.Model):
     name     = models.CharField('昵称', unique=True, max_length=150, help_text='昵称')
     forum_id = models.IntegerField('论坛ID', blank=True, null=True, unique=True, help_text='论坛ID')
     bio      = models.CharField('签名', blank=True, max_length=150, help_text='签名')
-    guild    = models.ForeignKey(
+
+    guild = models.ForeignKey(
         'guild.Guild', models.SET_NULL,
         related_name='members', verbose_name='势力',
         blank=True, null=True,
         help_text='势力',
     )
-    badges   = models.ManyToManyField('badge.Badge', related_name='players', verbose_name='勋章', help_text='勋章')
-    friends  = models.ManyToManyField('player.Player', related_name='+', verbose_name='好友', help_text='好友')
-    blocks   = models.ManyToManyField('player.Player', related_name='+', verbose_name='黑名单', help_text='黑名单')
+    badges = models.ManyToManyField(
+        'badge.Badge',
+        related_name='players', verbose_name='勋章',
+        blank=True,
+        help_text='勋章',
+    )
+    friends = models.ManyToManyField(
+        'self',
+        related_name='+', verbose_name='好友',
+        symmetrical=False, blank=True,
+        help_text='好友',
+    )
+    blocks = models.ManyToManyField(
+        'self',
+        related_name='+', verbose_name='黑名单',
+        symmetrical=False, blank=True,
+        help_text='黑名单',
+    )
 
     def __str__(self):
         return self.name

@@ -15,9 +15,9 @@ class Version(models.Model):
         verbose_name        = '游戏版本'
         verbose_name_plural = '游戏版本'
 
-    id      = models.SlugField('版本', max_length=20, primary_key=True)
-    url     = models.FileField('更新文件')
-    testing = models.BooleanField('显示测试服入口', default=False)
+    id = models.SlugField('版本', max_length=20, primary_key=True, help_text='版本')
+    url = models.FileField('更新文件', help_text='更新文件')
+    testing = models.BooleanField('显示测试服入口', default=False, help_text='显示测试服入口')
 
     def __str__(self):
         return self.id
@@ -43,7 +43,7 @@ class News(models.Model):
         verbose_name_plural = '新闻'
 
     id   = models.AutoField(primary_key=True)
-    text = models.TextField('正文')
+    text = models.TextField('正文', help_text='正文')
 
     def __str__(self):
         return f'News({self.id})'

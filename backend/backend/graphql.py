@@ -12,6 +12,7 @@ from player.schema import PlayerOps, PlayerQuery
 from system.schema import SystemOps, SystemQuery
 from unlock.schema import UnlockOps
 from utils import graphqlStub as stub
+import badge.schema  # noqa
 
 
 # -- code --

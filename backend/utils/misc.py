@@ -7,6 +7,7 @@ import graphene as gh
 
 # -- own --
 
+
 # -- code --
 def extendclass(clsname, bases, _dict):
     for cls in bases:
@@ -19,6 +20,6 @@ def extendclass(clsname, bases, _dict):
 def graphqlStub(cls, desc):
     return gh.Field(
         cls,
-        resolver=staticmethod(lambda root, info: cls()),
+        resolver=lambda root, info: cls(),
         description=desc,
     )

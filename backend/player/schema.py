@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from graphene_django.types import DjangoObjectType
 import django.contrib.auth.models as auth_models
 import graphene as gh
+from graphql import GraphQLError
 
 # -- own --
 from . import models
@@ -45,8 +46,13 @@ class Player(DjangoObjectType):
 
     @staticmethod
     def resolve_friends(root, info):
-        '要特殊处理'
-        pass
+        return root.friends.filter(friends__id=root.id)
+
+    @staticmethod
+    def resolve_friend_requests(root, info):
+        return root.friends.exclude(
+            id__in=root.friends.filter(friends__id=root.id).only('id')
+        )
 
 
 class Credit(DjangoObjectType):
@@ -64,7 +70,10 @@ class PlayerQuery(gh.ObjectType):
 
     @staticmethod
     def resolve_user(root, info, id=None, phone=None):
-        # FIXME: authorization
+        ctx = info.context
+        u = ctx.user
+        if not u.has_perm('player.view_user'):
+            raise GraphQLError('没有权限')
 
         if id is not None:
             return models.User.objects.get(id=id)
