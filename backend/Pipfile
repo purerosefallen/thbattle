@@ -14,6 +14,11 @@ graphene = "*"
 django-annoying = "*"
 pillow = "*"
 graphene-django = "*"
+django-redis-cache = "*"
+django-redis-sessions = "*"
+cryptography = "*"
+itsdangerous = "*"
+msgpack = "*"
 
 [dev-packages]
 ipython = "*"

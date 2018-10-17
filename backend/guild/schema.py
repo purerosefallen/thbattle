@@ -18,7 +18,28 @@ class Guild(DjangoObjectType):
 
 # ---------------------------
 class GuildQuery(gh.ObjectType):
-    guilds = gh.Field(Guild, keyword=gh.String(required=True))
+    guild = gh.Field(
+        Guild,
+        id=gh.ID(description="势力ID"),
+        name=gh.String(description='势力名称'),
+        description='获取势力',
+    )
+    guilds = gh.List(
+        gh.NonNull(Guild),
+        keyword=gh.String(required=True, description='关键词'),
+        description='查找势力',
+    )
+
+    @staticmethod
+    def resolve_guild(root, info, id=None, name=None):
+        if id is not None:
+            return models.Guild.objects.get(id=id)
+        elif name is not None:
+            return models.Guild.objects.get(name=name)
+
+    @staticmethod
+    def resolve_guilds(root, info, keyword):
+        return models.Guild.objects.filter(name__contains=keyword)
 
 
 class GuildOps(gh.ObjectType):
@@ -27,37 +48,31 @@ class GuildOps(gh.ObjectType):
         name=gh.String(required=True, description="势力名称"),
         slogan=gh.String(required=True, description="势力口号"),
         totem=gh.String(description="势力图腾（图片URL）"),
-        required=True,
         description="创建势力",
     )
 
     transfer = gh.Boolean(
         guildId=gh.ID(required=True, description="势力ID"),
         to=gh.ID(required=True, description="接收人用户ID"),
-        required=True,
         description="转让势力",
     )
 
     join = gh.Boolean(
         guildId=gh.ID(required=True, description="势力ID"),
-        required=True,
         description="申请加入势力",
     )
 
     approve = gh.Boolean(
         playerId=gh.ID(required=True, description="玩家ID"),
-        required=True,
         description="批准加入势力",
     )
 
     kick = gh.Boolean(
         playerId=gh.ID(required=True, description="玩家ID"),
-        required=True,
         description="踢出势力",
     )
 
     quit = gh.Boolean(
-        required=True,
         description="退出势力",
     )
 
@@ -65,6 +80,5 @@ class GuildOps(gh.ObjectType):
         Guild,
         slogan=gh.String(description="口号"),
         totem=gh.String(description="图腾（URL）"),
-        required=True,
         description="更新势力信息",
     )

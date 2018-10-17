@@ -16,9 +16,11 @@ class Item(DjangoObjectType):
         model = models.Item
 
 
+'''
 class ItemActivity(DjangoObjectType):
     class Meta:
         model = models.ItemActivity
+'''
 
 
 class ExchangeItem(DjangoObjectType):
@@ -27,17 +29,17 @@ class ExchangeItem(DjangoObjectType):
 
 
 class ExchangeQuery(gh.ObjectType):
-    items = gh.List(
-        gh.NonNull(ExchangeItem),
-        keyword=gh.String(description="关键词"),
-        description="搜索交易所",
-    )
+    exchange = gh.List(gh.NonNull(ExchangeItem), description="交易所")
+
+    @staticmethod
+    def resolve_exchange(root, info):
+        return models.Exchange.objects.order_by('-id')
 
 
 class ExchangeOps(gh.ObjectType):
-    buy    = gh.Field(Item, exchangeItemId=gh.ID(required=True, description="交易条目ID"), description="购买")
+    buy    = gh.Field(Item, exchangeId=gh.ID(required=True, description="交易条目ID"), description="购买")
     sell   = gh.Field(ExchangeItem, itemId=gh.ID(required=True, description="物品ID"), description="出售")
-    cancel = gh.Boolean(exchangeItemId=gh.ID(required=True, description="交易条目ID"), description="取消出售")
+    cancel = gh.Boolean(exchangeId=gh.ID(required=True, description="交易条目ID"), description="取消出售")
 
 
 class ItemOps(gh.ObjectType):

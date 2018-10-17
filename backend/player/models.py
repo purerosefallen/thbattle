@@ -2,15 +2,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
+import base64
 import re
 
 # -- third party --
-from annoying.fields import AutoOneToOneField
 from django.db import models
 from django.utils import timezone
 import django.contrib.auth.models as auth_models
+import itsdangerous
+import msgpack
 
 # -- own --
+import backend.settings
 
 
 # -- code --
@@ -66,6 +69,21 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
     is_active = models.BooleanField('启用帐号', default=True, help_text='指明用户是否被认为活跃的。以反选代替删除帐号。')
     date_joined = models.DateTimeField('加入日期', default=timezone.now, help_text='加入日期')
 
+    token_signer = itsdangerous.TimestampSigner(backend.settings.SECRET_KEY)
+
+    def token(self):
+        data = base64.b64encode(msgpack.dumps({'login': True, 'id': self.id}))
+        return self.token_signer.sign(data).decode('utf-8')
+
+    @classmethod
+    def from_token(cls, token):
+        data = cls.token_signer.unsign(token.encode('utf-8'))
+        data = msgpack.loads(base64.b64decode(data), encoding='utf-8')
+        if data.get('login') is not True:
+            return None
+
+        return cls.objects.get(id=data['id'])
+
 
 class Player(models.Model):
 
@@ -73,7 +91,7 @@ class Player(models.Model):
         verbose_name        = '玩家'
         verbose_name_plural = '玩家'
 
-    user     = AutoOneToOneField(User, models.CASCADE, verbose_name='用户', help_text='关联用户')
+    user     = models.OneToOneField(User, models.CASCADE, verbose_name='用户', help_text='关联用户')
     name     = models.CharField('昵称', unique=True, max_length=150, help_text='昵称')
     forum_id = models.IntegerField('论坛ID', blank=True, null=True, unique=True, help_text='论坛ID')
     bio      = models.CharField('签名', blank=True, max_length=150, help_text='签名')
@@ -113,11 +131,11 @@ class Credit(models.Model):
         verbose_name        = '积分'
         verbose_name_plural = '积分'
 
-    player = AutoOneToOneField(Player, models.CASCADE, verbose_name='玩家', help_text='玩家')
-    ppoint = models.IntegerField('P点', help_text='P点')
-    jiecao = models.IntegerField('节操', help_text='节操')
-    games  = models.IntegerField('游戏数', help_text='游戏数')
-    drops  = models.IntegerField('逃跑数', help_text='逃跑数')
+    player = models.OneToOneField(Player, models.CASCADE, primary_key=True, verbose_name='玩家', help_text='玩家')
+    ppoint = models.IntegerField('P点', default=0, help_text='P点')
+    jiecao = models.IntegerField('节操', default=0, help_text='节操')
+    games  = models.IntegerField('游戏数', default=0, help_text='游戏数')
+    drops  = models.IntegerField('逃跑数', default=0, help_text='逃跑数')
 
     def __str__(self):
         return self.player.name

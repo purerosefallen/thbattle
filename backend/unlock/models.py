@@ -34,8 +34,8 @@ class Achievement(models.Model):
 class Unlocked(models.Model):
 
     class Meta:
-        verbose_name        = '解锁项目'
-        verbose_name_plural = '解锁项目'
+        verbose_name        = '解锁'
+        verbose_name_plural = '解锁'
         unique_together = (
             ('player', 'item'),
         )

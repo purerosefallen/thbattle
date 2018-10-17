@@ -11,16 +11,19 @@ from item.schema import ExchangeOps, ExchangeQuery, ItemOps
 from player.schema import PlayerOps, PlayerQuery
 from system.schema import SystemOps, SystemQuery
 from unlock.schema import UnlockOps
-from utils import graphqlStub as stub
+from utils.graphql import stub
 import badge.schema  # noqa
 
 
 # -- code --
-class Query(gh.ObjectType):
+class Query(PlayerQuery, GuildQuery, ExchangeQuery, SystemQuery, gh.ObjectType):
+    pass
+    '''
     player   = stub(PlayerQuery,   "用户/玩家")
     guild    = stub(GuildQuery,    "势力")
     exchange = stub(ExchangeQuery, "交易所")
     system   = stub(SystemQuery,   "系统")
+    '''
 
 
 class Mutation(gh.ObjectType):

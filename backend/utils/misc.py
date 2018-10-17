@@ -3,8 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 # -- stdlib --
 # -- third party --
-import graphene as gh
-
 # -- own --
 
 
@@ -15,11 +13,3 @@ def extendclass(clsname, bases, _dict):
             if key == '__module__':
                 continue
             setattr(cls, key, value)
-
-
-def graphqlStub(cls, desc):
-    return gh.Field(
-        cls,
-        resolver=lambda root, info: cls(),
-        description=desc,
-    )

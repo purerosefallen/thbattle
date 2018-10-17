@@ -6,6 +6,7 @@
 *.un~
 *.sqlite3
 *~
+.env
 ?
 !src/resource/c
 .idea

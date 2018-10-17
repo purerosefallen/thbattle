@@ -48,13 +48,13 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    # 'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -127,3 +127,36 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'player.User'
+
+SESSION_ENGINE = 'redis_sessions.session'
+SESSION_REDIS = {
+    'host': 'localhost',
+    'port': 6379,
+    'db': 1,
+    'prefix': 'session',
+    'socket_timeout': 1,
+    'retry_on_timeout': False
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': 'localhost:6379',
+        'OPTIONS': {
+            'PICKLE_VERSION': 4,
+        }
+    }
+}
+
+
+class LeanCloudCredentials:
+    APP_ID = ''
+    APP_KEY = ''
+    MASTER_KEY = ''
+    URL = ''
+
+
+try:
+    from local_settings import *  # noqa
+except ImportError:
+    pass

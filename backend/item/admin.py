@@ -18,12 +18,14 @@ class ItemAdmin(admin.ModelAdmin):
     ordering = ('owner',)
 
 
+'''
 @admin.register(models.ItemActivity)
 class ItemActivityAdmin(admin.ModelAdmin):
     list_display = ('id', 'player', 'action', 'item', 'extra', 'created_at')
     list_filter = ('action',)
     search_fields = ('player__name', 'item__type')
     ordering = ('player',)
+'''
 
 
 @admin.register(models.Exchange)

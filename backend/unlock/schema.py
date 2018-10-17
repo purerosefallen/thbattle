@@ -25,13 +25,11 @@ class UnlockOps(gh.ObjectType):
     add_unlock = gh.Boolean(
         id=gh.ID(required=True, description="用户ID"),
         item=gh.String(required=True, description="解锁项目代码"),
-        required=True,
         description="解锁项目",
     )
 
     add_achievement = gh.Boolean(
         id=gh.ID(required=True, description="用户ID"),
         achievement=gh.String(required=True, description="成就代码"),
-        required=True,
         description="增加成就",
     )

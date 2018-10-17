@@ -16,19 +16,19 @@ class Item(models.Model):
         verbose_name        = '道具'
         verbose_name_plural = '道具'
 
-    id     = models.AutoField(primary_key=True)
-    owner  = models.ForeignKey(
+    id = models.AutoField(primary_key=True)
+    owner = models.ForeignKey(
         Player, models.CASCADE,
         related_name='items',
         verbose_name='所有者',
         help_text='所有者',
     )
-    type   = models.SlugField('类型', max_length=20, help_text='类型')  # some-item:arg
+    type = models.SlugField('类型', max_length=20, help_text='类型')  # some-item:arg
 
     def __str__(self):
         return f'[{self.id}] {self.type}:{self.arg}'
 
-
+'''
 class ItemActivity(models.Model):
 
     class Meta:
@@ -50,6 +50,7 @@ class ItemActivity(models.Model):
 
     def __str__(self):
         return self.id
+'''
 
 
 class Exchange(models.Model):
