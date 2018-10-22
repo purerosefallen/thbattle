@@ -150,10 +150,16 @@ CACHES = {
 
 
 class LeanCloudCredentials:
-    APP_ID = ''
-    APP_KEY = ''
+    APP_ID     = ''
+    APP_KEY    = ''
     MASTER_KEY = ''
-    URL = ''
+    URL        = ''
+
+
+class ForumInterconnect:
+    COOKIEPRE = ''
+    AUTHKEY   = ''
+    DB        = ''
 
 
 try:

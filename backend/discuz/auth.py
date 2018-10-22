@@ -2,20 +2,22 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
+from base64 import b64decode, b64encode
 import hashlib
 import time
 
 # -- third party --
 # -- own --
-from backend.settings import DISCUZ
 
 
 # -- code --
 def md5(s):
-    return hashlib.md5(s).hexdigest()
+    return hashlib.md5(s).hexdigest().encode('utf-8')
 
 
 def _discuz_authcode(string, operation, key, expiry=0):
+    assert isinstance(string, bytes)
+    assert isinstance(key, bytes)
     try:
         ckey_length = 4
         key = md5(key)
@@ -37,7 +39,7 @@ def _discuz_authcode(string, operation, key, expiry=0):
             if pads != -4:
                 string += '=' * -pads
 
-            string = string[ckey_length:].decode('base64')
+            string = b64decode(string[ckey_length:].decode('utf-8'))
         else:
             string = str(int(time.time()) + expiry if expiry else 10000000000)[-10:]
             string += md5(string + keyb)[:16] + string
@@ -45,8 +47,8 @@ def _discuz_authcode(string, operation, key, expiry=0):
         string_length = len(string)
         result = []
 
-        box = range(256)
-        rndkey = [ord(cryptkey[i % key_length]) for i in range(256)]
+        box = list(range(256))
+        rndkey = [cryptkey[i % key_length] for i in range(256)]
         j = 0
         for i in range(256):
             j = (j + box[i] + rndkey[i]) % 256
@@ -58,10 +60,10 @@ def _discuz_authcode(string, operation, key, expiry=0):
             j = (j + box[a]) % 256
             box[a], box[j] = box[j], box[a]
             result.append(
-                chr(ord(string[i]) ^ (box[(box[a] + box[j]) % 256]))
+                string[i] ^ (box[(box[a] + box[j]) % 256])
             )
 
-        result = ''.join(result)
+        result = bytes(result)
 
         if operation == 'DECODE':
             cond = int(result[:10]) == 0 or int(result[:10]) - time.time() > 0
@@ -69,33 +71,39 @@ def _discuz_authcode(string, operation, key, expiry=0):
             if cond:
                 return result[26:]
             else:
-                return ''
+                return b''
 
         else:
-            return keyc + result.encode('base64').replace('=', '')
+            return keyc + b64encode(result.encode('base64')).decode('utf-8').replace('=', '')
 
     except Exception:
-        return ''
+        return b''
 
 
-def authencode(plain, saltkey):
-    return _discuz_authcode(plain, 'ENCODE', md5(DISCUZ['authkey'] + saltkey))
+def authencode(plain, authkey, saltkey):
+    if isinstance(plain, str):
+        plain = plain.encode('utf-8')
+    k = (authkey + saltkey).encode('utf-8')
+    return _discuz_authcode(plain, 'ENCODE', md5(k))
 
 
-def authdecode(encrypted, saltkey):
-    return _discuz_authcode(encrypted, 'DECODE', md5(DISCUZ['authkey'] + saltkey))
+def authdecode(encrypted, authkey, saltkey):
+    if isinstance(encrypted, str):
+        encrypted = encrypted.encode('utf-8')
+    k = (authkey + saltkey).encode('utf-8')
+    return _discuz_authcode(encrypted, 'DECODE', md5(k))
 
 
 def check_password(password, hash, salt):
     return md5(md5(password) + salt) == hash
 
 
-def decode_cookie(auth, saltkey):
-    rst = authdecode(auth, saltkey).split('\t')
+def decode_cookie(auth, authkey, saltkey):
+    rst = authdecode(auth, authkey, saltkey).decode('utf-8').split('\t')
     if not rst:
         return {}
     password, uid = rst
-    return {'uid': uid, 'password': password}
+    return {'uid': int(uid), 'password': password}
 
 
 def check_cookie_pwd(pwd, password):

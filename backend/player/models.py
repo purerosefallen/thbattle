@@ -94,7 +94,7 @@ class Player(models.Model):
     user       = models.OneToOneField(User, models.CASCADE, verbose_name='用户', help_text='关联用户')
     name       = models.CharField('昵称', unique=True, max_length=150, help_text='昵称')
     forum_id   = models.IntegerField('论坛ID', blank=True, null=True, unique=True, help_text='论坛ID')
-    forum_name = models.IntegerField('论坛昵称', blank=True, null=True, unique=True, help_text='论坛昵称')
+    forum_name = models.CharField('论坛昵称', blank=True, null=True, max_length=150, unique=True, help_text='论坛昵称')
     bio        = models.CharField('签名', blank=True, max_length=150, help_text='签名')
     avatar     = models.URLField('头像', blank=True, max_length=150, help_text='头像')
 
@@ -133,6 +133,11 @@ class Player(models.Model):
 
 
 class Report(models.Model):
+
+    class Meta:
+        verbose_name        = '举报'
+        verbose_name_plural = '举报'
+
     reporter     = models.ForeignKey(Player, models.CASCADE, related_name='reports', verbose_name='举报者', help_text='举报者')
     suspect      = models.ForeignKey(Player, models.CASCADE, related_name='reported_by', verbose_name='嫌疑人', help_text='嫌疑人')
     reason       = models.CharField('原因', max_length=150, help_text='原因')

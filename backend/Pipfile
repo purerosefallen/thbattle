@@ -19,6 +19,7 @@ django-redis-sessions = "*"
 cryptography = "*"
 itsdangerous = "*"
 msgpack = "*"
+pymysql = "*"
 
 [dev-packages]
 ipython = "*"

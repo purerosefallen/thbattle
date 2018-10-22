@@ -2,16 +2,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
+from urllib.parse import unquote
+
 # -- third party --
 from django.db import transaction
 from graphene_django.types import DjangoObjectType
+from graphql import GraphQLError
 import django.contrib.auth as auth
 import django.contrib.auth.models as auth_models
 import graphene as gh
 
 # -- own --
 from . import models
-from graphql import GraphQLError
 from utils.graphql import require_login, require_perm
 import utils.leancloud
 
@@ -221,7 +223,6 @@ class Update(object):
     def Field(cls, **kw):
         return gh.Field(
             Player,
-            # id=gh.ID(required=True, description="玩家ID"),
             bio=gh.String(description="签名"),
             avatar=gh.String(description="头像"),
             resolver=cls.mutate,
@@ -242,16 +243,73 @@ class Update(object):
 class BindForum(object):
     @classmethod
     def Field(cls, **kw):
-        return gh.Field(
-            Player,
-            forum_id=gh.ID(required=True, description="论坛UID"),
-            forum_password=gh.String(required=True, description="论坛密码"),
+        return gh.Boolean(
+            resolver=cls.mutate,
             **kw,
         )
 
     @staticmethod
-    def mutate(root, info, forum_id, forum_password):
-        raise GraphQLError('not impl')
+    def mutate(root, info):
+        from backend.settings import ForumInterconnect as F
+        import discuz.auth as dzauth
+        import pymysql
+        from urllib.parse import urlparse, parse_qsl
+        from utils.piper import one, Q, scalar
+        ctx = info.context
+        require_login(ctx)
+        p = ctx.user.player
+        if p.forum_id:
+            raise GraphQLError('不可以重复绑定')
+
+        cookies = {
+            k.split('_')[-1]: v for k, v in ctx.COOKIES.items()
+            if k.startswith(F.COOKIEPRE)
+        }
+
+        if not ('auth' in cookies and 'saltkey' in cookies):
+            raise GraphQLError('需要先登录论坛')
+
+        auth = unquote(cookies['auth'])
+        saltkey = unquote(cookies['saltkey'])
+
+        decoded = dzauth.decode_cookie(auth, F.AUTHKEY, saltkey)
+        if 'uid' not in decoded:
+            raise GraphQLError('需要先登录论坛')
+
+        url = urlparse(F.DB)
+        db = pymysql.connect(
+            host=url.hostname,
+            user=url.username,
+            password=url.password,
+            database=url.path[1:],
+            port=int(url.port or 3306),
+            **dict(parse_qsl(url.query)),
+        )
+
+        rst = Q(db, '''
+            -- SQL
+            SELECT extcredits2 as jiecao, extcredits7 as drops, extcredits8 as games
+            FROM pre_common_member_count
+            WHERE uid = :uid
+        ''', {'uid': decoded['uid']}) | one
+
+        name = Q(db, '''
+            -- SQL
+            SELECT username FROM pre_ucenter_members
+            WHERE uid = :uid
+        ''', {'uid': decoded['uid']}) | scalar
+
+        del db
+
+        p.forum_id = decoded['uid']
+        p.forum_name = name
+        p.jiecao = rst['jiecao']
+        p.games = rst['games']
+        p.drops = rst['drops']
+
+        p.save()
+
+        return True
 
 
 class Friend(object):
