@@ -34,16 +34,15 @@ class UserAdmin(OriginalUserAdmin):
 
 @admin.register(models.Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'guild')
+    list_display = ('user', 'name', 'guild', 'ppoint', 'jiecao', 'games', 'drops')
     list_filter = ()
-    search_fields = ('user__username', 'guild__name')
+    search_fields = ('user__phone', 'name', 'guild__name')
     filter_horizontal = ('badges', 'friends', 'blocks')
     ordering = ('user',)
 
 
-@admin.register(models.Credit)
-class CreditAdmin(admin.ModelAdmin):
-    list_display = ('player', 'ppoint', 'jiecao', 'games', 'drops')
-    list_filter = ()
-    search_fields = ('player__name',)
-    ordering = ('player',)
+@admin.register(models.Report)
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ('reporter', 'suspect', 'reason', 'game_id', 'reported_at', 'is_processed')
+    list_filter = ('reason', 'is_processed',)
+    search_fields = ('reporter', 'suspect', 'reason')

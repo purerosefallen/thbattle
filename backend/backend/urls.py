@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """backend URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -13,15 +15,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+# -- stdlib --
+# -- third party --
 from django.contrib import admin
 from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
+
+# -- own --
 from .graphql import schema
 
 
+# -- code --
 admin.site.site_header = '东方符斗祭后台'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('graphql', GraphQLView.as_view(schema=schema, graphiql=True)),
+    path('graphql', csrf_exempt(GraphQLView.as_view(schema=schema, graphiql=True))),
 ]

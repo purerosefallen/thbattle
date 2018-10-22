@@ -21,8 +21,10 @@ def stub(cls, desc):
 
 def require_perm(ctx, perm):
     u = ctx.user
-    if not u.has_perm('player.view_user'):
+    if not u.has_perm(perm):
         raise GraphQLError('没有权限')
+
+    return True
 
 
 def rate_limit(token: str, duration: float) -> None:
@@ -32,3 +34,13 @@ def rate_limit(token: str, duration: float) -> None:
         raise GraphQLError('请求过于频繁')
 
     c.set(token, 'rate_limit', duration)
+
+    return True
+
+
+def require_login(ctx):
+    u = ctx.user
+    if not u.is_authenticated:
+        raise GraphQLError('需要登录')
+
+    return True

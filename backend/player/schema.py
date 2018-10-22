@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # -- stdlib --
 # -- third party --
 from django.db import transaction
-from graphene.utils.props import props
 from graphene_django.types import DjangoObjectType
 import django.contrib.auth as auth
 import django.contrib.auth.models as auth_models
@@ -13,7 +12,7 @@ import graphene as gh
 # -- own --
 from . import models
 from graphql import GraphQLError
-from utils.graphql import require_perm
+from utils.graphql import require_login, require_perm
 import utils.leancloud
 
 
@@ -40,7 +39,9 @@ class Player(DjangoObjectType):
     class Meta:
         model = models.Player
         exclude_fields = [
-            'phone',
+            'friended_by',
+            'blocked_by',
+            'reported_by',
         ]
 
     friend_requests = gh.List(
@@ -50,18 +51,38 @@ class Player(DjangoObjectType):
 
     @staticmethod
     def resolve_friends(root, info):
+        ctx = info.context
+        require_login(ctx)
+        p = ctx.user.player
+        if p.id != root.id:
+            require_perm(ctx, 'player.view_player')
         return root.friends.filter(friends__id=root.id)
 
     @staticmethod
     def resolve_friend_requests(root, info):
-        return root.friends.exclude(
-            id__in=root.friends.filter(friends__id=root.id).only('id')
+        ctx = info.context
+        require_login(ctx)
+        p = ctx.user.player
+        if p.id != root.id:
+            require_perm(ctx, 'player.view_player')
+        return root.friended_by.exclude(
+            id__in=root.friends.only('id')
         )
 
+    user = gh.Field(User, description="关联用户")
 
-class Credit(DjangoObjectType):
+    @staticmethod
+    def resolve_user(root, info):
+        ctx = info.context
+        require_login(ctx)
+        u = ctx.user
+        if u.id == root.user.id or require_perm(ctx, 'player.view_user'):
+            return root.user
+
+
+class Report(DjangoObjectType):
     class Meta:
-        model = models.Credit
+        model = models.Report
 
 
 class PlayerQuery(gh.ObjectType):
@@ -86,6 +107,13 @@ class PlayerQuery(gh.ObjectType):
             return models.User.from_token(token)
 
         return None
+
+    me = gh.Field(User, description="当前登录用户")
+
+    @staticmethod
+    def resolve_me(root, info, id=None, phone=None, token=None):
+        u = info.context.user
+        return u if u.is_authenticated else None
 
     player = gh.Field(
         Player,
@@ -132,8 +160,8 @@ class Register(gh.Mutation):
         password = gh.String(required=True, description="密码")
         smscode  = gh.Int(required=True, description="短信验证码")
 
-    token = gh.String(required=True, description="登录令牌")
-    user = gh.Field(User, required=True, description="用户")
+    token  = gh.String(required=True, description="登录令牌")
+    user   = gh.Field(User, required=True, description="用户")
     player = gh.Field(Player, required=True, description="玩家")
 
     @staticmethod
@@ -151,8 +179,6 @@ class Register(gh.Mutation):
                 u.save()
                 p = models.Player.objects.create(user=u, name=name)
                 p.save()
-                c = models.Credit.objects.create(player=p)
-                c.save()
             except Exception:
                 import traceback
                 traceback.print_exc()
@@ -165,17 +191,15 @@ class Register(gh.Mutation):
 
 
 class Login(object):
-    class Arguments:
-        phone    = gh.String(description="手机")
-        forum_id = gh.ID(description="论坛用户ID")
-        name     = gh.String(description="昵称")
-        password = gh.String(required=True, description="密码")
-
     @classmethod
     def Field(cls, **kw):
-        return gh.Boolean(
+        return gh.Field(
+            User,
+            phone=gh.String(description="手机"),
+            forum_id=gh.ID(description="论坛用户ID"),
+            name=gh.String(description="昵称"),
+            password=gh.String(required=True, description="密码"),
             resolver=cls.mutate,
-            **props(cls.Arguments),
             **kw,
         )
 
@@ -189,7 +213,7 @@ class Login(object):
             return None
 
         auth.login(info.context, u)
-        return True
+        return u
 
 
 class Update(object):
@@ -197,40 +221,133 @@ class Update(object):
     def Field(cls, **kw):
         return gh.Field(
             Player,
-            id=gh.ID(required=True, description="玩家ID"),
+            # id=gh.ID(required=True, description="玩家ID"),
             bio=gh.String(description="签名"),
+            avatar=gh.String(description="头像"),
             resolver=cls.mutate,
             **kw,
         )
 
     @staticmethod
-    def mutate(root, info, bio=None):
-        pass
+    def mutate(root, info, bio=None, avatar=None):
+        ctx = info.context
+        require_login(ctx)
+        p = ctx.user.player
+        p.bio = bio or p.bio
+        p.avatar = avatar or p.avatar
+        p.save()
+        return p
+
+
+class BindForum(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Field(
+            Player,
+            forum_id=gh.ID(required=True, description="论坛UID"),
+            forum_password=gh.String(required=True, description="论坛密码"),
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info, forum_id, forum_password):
+        raise GraphQLError('not impl')
+
+
+class Friend(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Boolean(
+            id=gh.ID(required=True, description="目标玩家ID"),
+            resolver=cls.mutate,
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info, id):
+        ctx = info.context
+        require_login(ctx)
+        me = ctx.user.player
+        p = models.Player.objects.get(id=id)
+        if not p:
+            raise GraphQLError('找不到相应的玩家')
+        me.friends.add(p)
+        return True
+
+
+class Unfriend(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Boolean(
+            id=gh.ID(required=True, description="目标玩家ID"),
+            resolver=cls.mutate,
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info, id):
+        ctx = info.context
+        require_login(ctx)
+        me = ctx.user.player
+        p = models.Player.objects.get(id=id)
+        if not p:
+            raise GraphQLError('找不到相应的玩家')
+        me.friends.remove(p)
+        p.friends.remove(me)
+        return True
+
+
+class Block(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Boolean(
+            id=gh.ID(required=True, description="目标玩家ID"),
+            resolver=cls.mutate,
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info, id):
+        raise GraphQLError('not impl')
+
+
+class Unblock(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Boolean(
+            id=gh.ID(required=True, description="目标玩家ID"),
+            resolver=cls.mutate,
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info, id):
+        raise GraphQLError('not impl')
+
+
+class ReportOp(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Boolean(
+            id=gh.ID(required=True, description="目标玩家ID"),
+            reason=gh.ID(required=True, description="举报原因"),
+            game_id=gh.ID(description="游戏ID（如果有）"),
+            resolver=cls.mutate,
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info, id, reason, game_id=None):
+        raise GraphQLError('not impl')
 
 
 class PlayerOps(gh.ObjectType):
-    login = Login.Field(description="登录")
-    register = Register.Field(description="注册")
-    update = Update.Field(description="更新资料")
-    bind_forum = gh.Field(
-        Player,
-        forum_id=gh.ID(required=True, description="论坛UID"),
-        forum_password=gh.String(required=True, description="论坛密码"),
-        description="绑定论坛帐号",
-    )
-    friend = gh.Boolean(
-        id=gh.ID(required=True, description="目标玩家ID"),
-        description="发起好友请求",
-    )
-    unfriend = gh.Boolean(
-        id=gh.ID(required=True, description="目标玩家ID"),
-        description="移除好友/拒绝好友请求",
-    )
-    block = gh.Boolean(
-        id=gh.ID(required=True, description="目标玩家ID"),
-        description="拉黑",
-    )
-    unblock = gh.Boolean(
-        id=gh.ID(required=True, description="目标玩家ID"),
-        description="解除拉黑",
-    )
+    login      = Login.Field(description="登录")
+    register   = Register.Field(description="注册")
+    update     = Update.Field(description="更新资料")
+    bind_forum = BindForum.Field(description="绑定论坛帐号")
+    friend     = Friend.Field(description="发起好友请求")
+    unfriend   = Unfriend.Field(description="移除好友/拒绝好友请求")
+    block      = Block.Field(description="拉黑")
+    unblock    = Unblock.Field(description="解除拉黑")
+    report     = ReportOp.Field(description="举报玩家")

@@ -77,7 +77,7 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
 
     @classmethod
     def from_token(cls, token):
-        data = cls.token_signer.unsign(token.encode('utf-8'))
+        data = cls.token_signer.unsign(token.encode('utf-8'), max_age=30)
         data = msgpack.loads(base64.b64decode(data), encoding='utf-8')
         if data.get('login') is not True:
             return None
@@ -91,10 +91,12 @@ class Player(models.Model):
         verbose_name        = '玩家'
         verbose_name_plural = '玩家'
 
-    user     = models.OneToOneField(User, models.CASCADE, verbose_name='用户', help_text='关联用户')
-    name     = models.CharField('昵称', unique=True, max_length=150, help_text='昵称')
-    forum_id = models.IntegerField('论坛ID', blank=True, null=True, unique=True, help_text='论坛ID')
-    bio      = models.CharField('签名', blank=True, max_length=150, help_text='签名')
+    user       = models.OneToOneField(User, models.CASCADE, verbose_name='用户', help_text='关联用户')
+    name       = models.CharField('昵称', unique=True, max_length=150, help_text='昵称')
+    forum_id   = models.IntegerField('论坛ID', blank=True, null=True, unique=True, help_text='论坛ID')
+    forum_name = models.IntegerField('论坛昵称', blank=True, null=True, unique=True, help_text='论坛昵称')
+    bio        = models.CharField('签名', blank=True, max_length=150, help_text='签名')
+    avatar     = models.URLField('头像', blank=True, max_length=150, help_text='头像')
 
     guild = models.ForeignKey(
         'guild.Guild', models.SET_NULL,
@@ -110,32 +112,30 @@ class Player(models.Model):
     )
     friends = models.ManyToManyField(
         'self',
-        related_name='+', verbose_name='好友',
+        related_name='friended_by', verbose_name='好友',
         symmetrical=False, blank=True,
         help_text='好友',
     )
     blocks = models.ManyToManyField(
         'self',
-        related_name='+', verbose_name='黑名单',
+        related_name='blocked_by', verbose_name='黑名单',
         symmetrical=False, blank=True,
         help_text='黑名单',
     )
 
-    def __str__(self):
-        return self.name
-
-
-class Credit(models.Model):
-
-    class Meta:
-        verbose_name        = '积分'
-        verbose_name_plural = '积分'
-
-    player = models.OneToOneField(Player, models.CASCADE, primary_key=True, verbose_name='玩家', help_text='玩家')
     ppoint = models.IntegerField('P点', default=0, help_text='P点')
     jiecao = models.IntegerField('节操', default=0, help_text='节操')
     games  = models.IntegerField('游戏数', default=0, help_text='游戏数')
     drops  = models.IntegerField('逃跑数', default=0, help_text='逃跑数')
 
     def __str__(self):
-        return self.player.name
+        return self.name
+
+
+class Report(models.Model):
+    reporter     = models.ForeignKey(Player, models.CASCADE, related_name='reports', verbose_name='举报者', help_text='举报者')
+    suspect      = models.ForeignKey(Player, models.CASCADE, related_name='reported_by', verbose_name='嫌疑人', help_text='嫌疑人')
+    reason       = models.CharField('原因', max_length=150, help_text='原因')
+    game_id      = models.IntegerField('游戏ID', null=True, blank=True, help_text='游戏ID')
+    reported_at  = models.DateTimeField('举报时间', default=timezone.now, help_text='举报时间')
+    is_processed = models.BooleanField('已经处理', default=False, help_text='已经处理')
