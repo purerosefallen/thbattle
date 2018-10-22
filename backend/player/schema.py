@@ -176,15 +176,10 @@ class Register(gh.Mutation):
             raise GraphQLError('验证码不正确')
 
         with transaction.atomic():
-            try:
-                u = models.User.objects.create_user(phone=phone, password=password)
-                u.save()
-                p = models.Player.objects.create(user=u, name=name)
-                p.save()
-            except Exception:
-                import traceback
-                traceback.print_exc()
-                raise
+            u = models.User.objects.create_user(phone=phone, password=password)
+            u.save()
+            p = models.Player.objects.create(user=u, name=name)
+            p.save()
 
         return Register(
             user=u, player=u.player,
@@ -399,6 +394,30 @@ class ReportOp(object):
         raise GraphQLError('not impl')
 
 
+class AddCredit(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Boolean(
+            id=gh.ID(required=True, description="目标玩家ID"),
+            jiecao=gh.Int(description="节操"),
+            games=gh.Int(description="游戏数"),
+            drops=gh.Int(description="逃跑数"),
+            resolver=cls.mutate,
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info, id, jiecao=0, games=0, drops=0):
+        ctx = info.context
+        require_perm(ctx, 'player.change_credit')
+        p = models.Player.objects.get(id=id)
+        p.jiecao += jiecao
+        p.games += games
+        p.drops += drops
+        p.save()
+        return True
+
+
 class PlayerOps(gh.ObjectType):
     login      = Login.Field(description="登录")
     register   = Register.Field(description="注册")
@@ -409,3 +428,4 @@ class PlayerOps(gh.ObjectType):
     block      = Block.Field(description="拉黑")
     unblock    = Unblock.Field(description="解除拉黑")
     report     = ReportOp.Field(description="举报玩家")
+    add_credit = AddCredit.Field(description="增加积分（服务器用）")

@@ -91,6 +91,10 @@ class Player(models.Model):
         verbose_name        = '玩家'
         verbose_name_plural = '玩家'
 
+        permissions = (
+            ("change_credit", "可以修改积分"),
+        )
+
     user       = models.OneToOneField(User, models.CASCADE, verbose_name='用户', help_text='关联用户')
     name       = models.CharField('昵称', unique=True, max_length=150, help_text='昵称')
     forum_id   = models.IntegerField('论坛ID', blank=True, null=True, unique=True, help_text='论坛ID')
