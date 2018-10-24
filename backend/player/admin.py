@@ -43,6 +43,6 @@ class PlayerAdmin(admin.ModelAdmin):
 
 @admin.register(models.Report)
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('reporter', 'suspect', 'reason', 'game_id', 'reported_at', 'is_processed')
-    list_filter = ('reason', 'is_processed',)
+    list_display = ('reporter', 'suspect', 'reason', 'detail', 'game_id', 'reported_at', 'outcome')
+    list_filter = ('reason',)
     search_fields = ('reporter', 'suspect', 'reason')

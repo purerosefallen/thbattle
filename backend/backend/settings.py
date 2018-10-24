@@ -148,6 +148,10 @@ CACHES = {
     }
 }
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend'),
+]
+
 
 class LeanCloudCredentials:
     APP_ID     = ''

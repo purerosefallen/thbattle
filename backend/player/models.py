@@ -102,6 +102,11 @@ class Player(models.Model):
     bio        = models.CharField('签名', blank=True, max_length=150, help_text='签名')
     avatar     = models.URLField('头像', blank=True, max_length=150, help_text='头像')
 
+    ppoint = models.IntegerField('P点', default=0, help_text='P点')
+    jiecao = models.IntegerField('节操', default=0, help_text='节操')
+    games  = models.IntegerField('游戏数', default=0, help_text='游戏数')
+    drops  = models.IntegerField('逃跑数', default=0, help_text='逃跑数')
+
     guild = models.ForeignKey(
         'guild.Guild', models.SET_NULL,
         related_name='members', verbose_name='势力',
@@ -127,11 +132,6 @@ class Player(models.Model):
         help_text='黑名单',
     )
 
-    ppoint = models.IntegerField('P点', default=0, help_text='P点')
-    jiecao = models.IntegerField('节操', default=0, help_text='节操')
-    games  = models.IntegerField('游戏数', default=0, help_text='游戏数')
-    drops  = models.IntegerField('逃跑数', default=0, help_text='逃跑数')
-
     def __str__(self):
         return self.name
 
@@ -144,7 +144,11 @@ class Report(models.Model):
 
     reporter     = models.ForeignKey(Player, models.CASCADE, related_name='reports', verbose_name='举报者', help_text='举报者')
     suspect      = models.ForeignKey(Player, models.CASCADE, related_name='reported_by', verbose_name='嫌疑人', help_text='嫌疑人')
-    reason       = models.CharField('原因', max_length=150, help_text='原因')
+    reason       = models.CharField('原因', max_length=10, help_text='原因')
+    detail       = models.TextField('详情', help_text='原因')
     game_id      = models.IntegerField('游戏ID', null=True, blank=True, help_text='游戏ID')
     reported_at  = models.DateTimeField('举报时间', default=timezone.now, help_text='举报时间')
-    is_processed = models.BooleanField('已经处理', default=False, help_text='已经处理')
+    outcome      = models.CharField('处理结果', max_length=150, blank=True, null=True, help_text='处理结果')
+
+    def __str__(self):
+        return f'{self.reporter.name} 举报 {self.suspect.name} {self.reason}'

@@ -283,21 +283,22 @@ class BindForum(object):
 
         rst = Q(db, '''
             -- SQL
-            SELECT extcredits2 as jiecao, extcredits7 as drops, extcredits8 as games
-            FROM pre_common_member_count
-            WHERE uid = :uid
+            SELECT
+                m.username as name,
+                c.extcredits2 as jiecao,
+                c.extcredits7 as drops,
+                c.extcredits8 as games
+            FROM
+                pre_ucenter_members m,
+                pre_common_member_count c
+            WHERE
+                m.uid = c.uid AND m.uid = :uid
         ''', {'uid': decoded['uid']}) | one
-
-        name = Q(db, '''
-            -- SQL
-            SELECT username FROM pre_ucenter_members
-            WHERE uid = :uid
-        ''', {'uid': decoded['uid']}) | scalar
 
         del db
 
         p.forum_id = decoded['uid']
-        p.forum_name = name
+        p.forum_name = rst['name']
         p.jiecao = rst['jiecao']
         p.games = rst['games']
         p.drops = rst['drops']
@@ -361,7 +362,15 @@ class Block(object):
 
     @staticmethod
     def mutate(root, info, id):
-        raise GraphQLError('not impl')
+        ctx = info.context
+        require_login(ctx)
+        me = ctx.user.player
+        tgt = models.Player.objects.get(id=id)
+        if not tgt:
+            raise GraphQLError('没有找到指定的玩家')
+
+        me.blocks.add(tgt)
+        return True
 
 
 class Unblock(object):
@@ -375,29 +384,53 @@ class Unblock(object):
 
     @staticmethod
     def mutate(root, info, id):
-        raise GraphQLError('not impl')
+        ctx = info.context
+        require_login(ctx)
+        me = ctx.user.player
+        tgt = models.Player.objects.get(id=id)
+        if not tgt:
+            raise GraphQLError('没有找到指定的玩家')
+
+        me.remove.add(tgt)
+        return True
 
 
 class ReportOp(object):
     @classmethod
     def Field(cls, **kw):
-        return gh.Boolean(
+        return gh.Field(
+            Report,
             id=gh.ID(required=True, description="目标玩家ID"),
-            reason=gh.ID(required=True, description="举报原因"),
+            reason=gh.String(required=True, description="举报原因"),
+            detail=gh.String(required=True, description="详情"),
             game_id=gh.ID(description="游戏ID（如果有）"),
             resolver=cls.mutate,
             **kw,
         )
 
     @staticmethod
-    def mutate(root, info, id, reason, game_id=None):
-        raise GraphQLError('not impl')
+    def mutate(root, info, id, reason, detail, game_id=None):
+        ctx = info.context
+        require_login(ctx)
+        me = ctx.user.player
+        tgt = models.Player.objects.get(id=id)
+        if not tgt:
+            raise GraphQLError('没有找到指定的玩家')
+
+        r = models.Report.objects.create(
+            reporter=me, suspect=tgt,
+            reason=reason, detail=detail, game_id=game_id,
+        )
+
+        r.save()
+        return r
 
 
 class AddCredit(object):
     @classmethod
     def Field(cls, **kw):
-        return gh.Boolean(
+        return gh.Field(
+            Player,
             id=gh.ID(required=True, description="目标玩家ID"),
             jiecao=gh.Int(description="节操"),
             games=gh.Int(description="游戏数"),
@@ -415,7 +448,7 @@ class AddCredit(object):
         p.games += games
         p.drops += drops
         p.save()
-        return True
+        return p
 
 
 class PlayerOps(gh.ObjectType):
