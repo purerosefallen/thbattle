@@ -79,7 +79,8 @@ module.exports = {
   },
   resolve: {
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
+      'vue$': 'vue/dist/vue.esm.js',
+      '~': path.resolve('.') + '/src',
     },
     extensions: ['*', '.js', '.vue', '.json']
   },
@@ -87,6 +88,7 @@ module.exports = {
     // historyApiFallback: true,
     // noInfo: true,
     // overlay: true
+    disableHostCheck: true,
   },
   performance: {
     hints: false

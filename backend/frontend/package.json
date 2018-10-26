@@ -12,6 +12,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.4.1",
     "bulma": "^0.7.2",
+    "lodash": "^4.17.11",
+    "lodash.debounce": "^4.0.8",
     "vue": "^2.5.11",
     "vue-router": "^3.0.1"
   },
@@ -23,6 +25,7 @@
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-3": "^6.24.1",
     "copy-webpack-plugin": "^4.5.4",

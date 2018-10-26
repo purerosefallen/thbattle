@@ -20,7 +20,7 @@ class Guild(DjangoObjectType):
 class GuildQuery(gh.ObjectType):
     guild = gh.Field(
         Guild,
-        id=gh.ID(description="势力ID"),
+        id=gh.Int(description="势力ID"),
         name=gh.String(description='势力名称'),
         description='获取势力',
     )
@@ -52,23 +52,23 @@ class GuildOps(gh.ObjectType):
     )
 
     transfer = gh.Boolean(
-        guildId=gh.ID(required=True, description="势力ID"),
-        to=gh.ID(required=True, description="接收人用户ID"),
+        guildId=gh.Int(required=True, description="势力ID"),
+        to=gh.Int(required=True, description="接收人用户ID"),
         description="转让势力",
     )
 
     join = gh.Boolean(
-        guildId=gh.ID(required=True, description="势力ID"),
+        guildId=gh.Int(required=True, description="势力ID"),
         description="申请加入势力",
     )
 
     approve = gh.Boolean(
-        playerId=gh.ID(required=True, description="玩家ID"),
+        playerId=gh.Int(required=True, description="玩家ID"),
         description="批准加入势力",
     )
 
     kick = gh.Boolean(
-        playerId=gh.ID(required=True, description="玩家ID"),
+        playerId=gh.Int(required=True, description="玩家ID"),
         description="踢出势力",
     )
 

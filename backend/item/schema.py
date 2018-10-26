@@ -37,21 +37,21 @@ class ExchangeQuery(gh.ObjectType):
 
 
 class ExchangeOps(gh.ObjectType):
-    buy    = gh.Field(Item, exchangeId=gh.ID(required=True, description="交易条目ID"), description="购买")
-    sell   = gh.Field(ExchangeItem, itemId=gh.ID(required=True, description="物品ID"), description="出售")
-    cancel = gh.Boolean(exchangeId=gh.ID(required=True, description="交易条目ID"), description="取消出售")
+    buy    = gh.Field(Item, exchangeId=gh.Int(required=True, description="交易条目ID"), description="购买")
+    sell   = gh.Field(ExchangeItem, itemId=gh.Int(required=True, description="物品ID"), description="出售")
+    cancel = gh.Boolean(exchangeId=gh.Int(required=True, description="交易条目ID"), description="取消出售")
 
 
 class ItemOps(gh.ObjectType):
     add = gh.Field(
         Item,
-        to=gh.ID(required=True, description="玩家ID"),
+        to=gh.Int(required=True, description="玩家ID"),
         typ=gh.String(required=True, description="物品类型"),
         reason=gh.String(required=True, description="原因"),
         description="给予玩家一个物品",
     )
     remove = gh.Boolean(
-        itemId=gh.ID(required=True, description="物品ID"),
+        itemId=gh.Int(required=True, description="物品ID"),
         reason=gh.String(required=True, description="原因"),
         description="移除物品",
     )

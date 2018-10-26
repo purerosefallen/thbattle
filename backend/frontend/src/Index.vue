@@ -12,11 +12,21 @@
 </style>
 
 <script>
-import HeaderSection from './components/header/Header.vue'
-import FooterSection from './components/footer/Footer.vue'
+import FooterSection from '~/components/footer/Footer.vue'
+import HeaderSection from '~/components/header/Header.vue'
+import { Q } from '~/utils.js'
+import Store from '~/store.js'
 
 export default {
   name: 'Index',
   components: { HeaderSection, FooterSection },
+  data() {
+    return {
+        store: Store,
+    }
+  },
+  mounted: function() {
+    Store.refreshAccount();
+  },
 }
 </script>

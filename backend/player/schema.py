@@ -81,10 +81,53 @@ class Player(DjangoObjectType):
         if u.id == root.user.id or require_perm(ctx, 'player.view_user'):
             return root.user
 
+    token = gh.String(description="登录令牌")
+
+    @staticmethod
+    def resolve_token(root, info):
+        ctx = info.context
+        require_login(ctx)
+        p = ctx.user.player
+        if p.id != root.id:
+            require_perm(ctx, 'superuser')
+
+        return root.token()
+
 
 class Report(DjangoObjectType):
     class Meta:
         model = models.Report
+
+
+class Availability(gh.ObjectType):
+    phone = gh.Boolean(phone=gh.String(description="手机号"), description="手机号可用")
+    name = gh.Boolean(name=gh.String(description="昵称"), description="昵称可用")
+
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Field(
+            Availability,
+            resolver=cls.resolve,
+            **kw,
+        )
+
+    @staticmethod
+    def resolve(root, info):
+        return Availability()
+
+    @staticmethod
+    def resolve_phone(root, info, phone):
+        if not models.is_phone_number(phone):
+            raise GraphQLError('手机号不合法')
+
+        return not models.User.objects.filter(phone=phone.strip()).exists()
+
+    @staticmethod
+    def resolve_name(root, info, name):
+        if not models.is_name(name):
+            raise GraphQLError('昵称不合法')
+
+        return not models.Player.objects.filter(name=name.strip()).exists()
 
 
 class PlayerQuery(gh.ObjectType):
@@ -92,44 +135,47 @@ class PlayerQuery(gh.ObjectType):
         User,
         id=gh.Int(description="用户ID"),
         phone=gh.String(description="手机号"),
-        token=gh.String(description="登录令牌"),
         description="获取用户",
     )
 
     @staticmethod
-    def resolve_user(root, info, id=None, phone=None, token=None):
+    def resolve_user(root, info, id=None, phone=None):
         ctx = info.context
         require_perm(ctx, 'player.view_user')
 
         if id is not None:
             return models.User.objects.get(id=id)
         elif phone is not None:
-            return models.User.objects.get(phone=phone)
-        elif token is not None:
-            return models.User.from_token(token)
+            return models.User.objects.get(phone=phone.strip())
 
         return None
 
     me = gh.Field(User, description="当前登录用户")
 
     @staticmethod
-    def resolve_me(root, info, id=None, phone=None, token=None):
+    def resolve_me(root, info):
         u = info.context.user
         return u if u.is_authenticated else None
 
     player = gh.Field(
         Player,
         id=gh.Int(description="玩家ID"),
+        forum_id=gh.Int(description="论坛ID"),
         name=gh.String(description="玩家昵称"),
+        token=gh.String(description="登录令牌"),
         description="获取玩家",
     )
 
     @staticmethod
-    def resolve_player(root, info, id=None, name=None):
+    def resolve_player(root, info, id=None, forum_id=None, name=None, token=None):
         if id is not None:
             return models.Player.objects.get(id=id)
+        elif id is not None:
+            return models.Player.objects.get(forum_id=forum_id)
         elif name is not None:
-            return models.Player.objects.get(name=name)
+            return models.Player.objects.get(name=name.strip())
+        elif token is not None:
+            return models.Player.from_token(token)
 
         return None
 
@@ -154,6 +200,8 @@ class PlayerQuery(gh.ObjectType):
         else:
             return None
 
+    availability = Availability.Field(description="查询是否被占用")
+
 
 class Register(gh.Mutation):
     class Arguments:
@@ -168,6 +216,14 @@ class Register(gh.Mutation):
 
     @staticmethod
     def mutate(root, info, name, phone, password, smscode):
+        name, phone = map(str.strip, [name, phone])
+
+        if not models.is_phone_number(phone):
+            raise GraphQLError('手机号不合法')
+
+        if not models.is_name(name):
+            raise GraphQLError('昵称不合法')
+
         if models.User.objects.filter(phone=phone).exists():
             raise GraphQLError('手机已经注册')
         elif models.Player.objects.filter(name=name).exists():
@@ -193,7 +249,7 @@ class Login(object):
         return gh.Field(
             User,
             phone=gh.String(description="手机"),
-            forum_id=gh.ID(description="论坛用户ID"),
+            forum_id=gh.Int(description="论坛用户ID"),
             name=gh.String(description="昵称"),
             password=gh.String(required=True, description="密码"),
             resolver=cls.mutate,
@@ -202,7 +258,22 @@ class Login(object):
 
     @staticmethod
     def mutate(root, info, phone=None, forum_id=None, name=None, password=None):
-        if not phone:
+        phone = phone and phone.strip()
+        name = name and name.strip()
+
+        if name:
+            p = models.Player.objects.get(name=name.strip())
+            if not p:
+                return None
+            phone = p.user.phone
+        elif forum_id:
+            p = models.Player.objects.get(forum_id=forum_id)
+            if not p:
+                return None
+            phone = p.user.phone
+        elif phone:
+            pass
+        else:
             return None
 
         u = auth.authenticate(phone=phone, password=password)
@@ -211,6 +282,20 @@ class Login(object):
 
         auth.login(info.context, u)
         return u
+
+
+class Logout(object):
+    @classmethod
+    def Field(cls, **kw):
+        return gh.Boolean(
+            resolver=cls.mutate,
+            **kw,
+        )
+
+    @staticmethod
+    def mutate(root, info):
+        auth.logout(info.context)
+        return True
 
 
 class Update(object):
@@ -249,7 +334,7 @@ class BindForum(object):
         import discuz.auth as dzauth
         import pymysql
         from urllib.parse import urlparse, parse_qsl
-        from utils.piper import one, Q, scalar
+        from utils.piper import one, Q
         ctx = info.context
         require_login(ctx)
         p = ctx.user.player
@@ -312,7 +397,7 @@ class Friend(object):
     @classmethod
     def Field(cls, **kw):
         return gh.Boolean(
-            id=gh.ID(required=True, description="目标玩家ID"),
+            id=gh.Int(required=True, description="目标玩家ID"),
             resolver=cls.mutate,
             **kw,
         )
@@ -333,7 +418,7 @@ class Unfriend(object):
     @classmethod
     def Field(cls, **kw):
         return gh.Boolean(
-            id=gh.ID(required=True, description="目标玩家ID"),
+            id=gh.Int(required=True, description="目标玩家ID"),
             resolver=cls.mutate,
             **kw,
         )
@@ -355,7 +440,7 @@ class Block(object):
     @classmethod
     def Field(cls, **kw):
         return gh.Boolean(
-            id=gh.ID(required=True, description="目标玩家ID"),
+            id=gh.Int(required=True, description="目标玩家ID"),
             resolver=cls.mutate,
             **kw,
         )
@@ -377,7 +462,7 @@ class Unblock(object):
     @classmethod
     def Field(cls, **kw):
         return gh.Boolean(
-            id=gh.ID(required=True, description="目标玩家ID"),
+            id=gh.Int(required=True, description="目标玩家ID"),
             resolver=cls.mutate,
             **kw,
         )
@@ -400,10 +485,10 @@ class ReportOp(object):
     def Field(cls, **kw):
         return gh.Field(
             Report,
-            id=gh.ID(required=True, description="目标玩家ID"),
+            id=gh.Int(required=True, description="目标玩家ID"),
             reason=gh.String(required=True, description="举报原因"),
             detail=gh.String(required=True, description="详情"),
-            game_id=gh.ID(description="游戏ID（如果有）"),
+            game_id=gh.Int(description="游戏ID（如果有）"),
             resolver=cls.mutate,
             **kw,
         )
@@ -431,7 +516,7 @@ class AddCredit(object):
     def Field(cls, **kw):
         return gh.Field(
             Player,
-            id=gh.ID(required=True, description="目标玩家ID"),
+            id=gh.Int(required=True, description="目标玩家ID"),
             jiecao=gh.Int(description="节操"),
             games=gh.Int(description="游戏数"),
             drops=gh.Int(description="逃跑数"),
@@ -453,6 +538,7 @@ class AddCredit(object):
 
 class PlayerOps(gh.ObjectType):
     login      = Login.Field(description="登录")
+    logout     = Logout.Field(description="退出登录")
     register   = Register.Field(description="注册")
     update     = Update.Field(description="更新资料")
     bind_forum = BindForum.Field(description="绑定论坛帐号")
