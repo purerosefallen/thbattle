@@ -5,13 +5,13 @@ from setuptools import setup, find_packages
 
 install_requires = [
     'M2Crypto',
-    'MySQL-python',
+   # 'MySQL-python',
     'Pillow',
     'PyMySQL',
     'SQLAlchemy',
     'bottle',
     'colorlog',
-    'gevent>=1.0.1',
+    'gevent==1.1.2',
     'msgpack-python',
     'pygit2>=0.21.3',
     'redis',
